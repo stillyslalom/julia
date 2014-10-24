@@ -92,6 +92,12 @@ C = Array(Int, size(A, 1), size(B, 2))
 @test At_mul_B!(C, A, B) == A'*B
 @test A_mul_Bt!(C, A, B) == A*B'
 @test At_mul_Bt!(C, A, B) == A'*B'
+v = [1,2,3]
+C = Array(Int, 3, 3)
+@test A_mul_Bt!(C, v, v) == v*v'
+vf = float64(v)
+C = Array(Float64, 3, 3)
+@test A_mul_Bt!(C, v, v) == v*v'
 
 # matrix algebra with subarrays of floats (stride != 1)
 A = reshape(float64(1:20),5,4)
@@ -206,7 +212,7 @@ Ai = int(ceil(Ar*100))
 @test isequal(scale(BigFloat[1.0], 2.0f0im),   Complex{BigFloat}[2.0im])
 
 # issue #6450
-@test dot({1.0,2.0},{3.5,4.5}) === 12.5
+@test dot(Any[1.0,2.0], Any[3.5,4.5]) === 12.5
 
 # issue #7181
 A = [ 1  5  9

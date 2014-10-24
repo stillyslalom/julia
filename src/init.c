@@ -732,7 +732,7 @@ void julia_init(char *imageFile)
     jl_page_size = jl_getpagesize();
     jl_arr_xtralloc_limit = uv_get_total_memory() / 100;  // Extra allocation limited to 1% of total RAM 
     jl_find_stack_bottom();
-    jl_dl_handle = jl_load_dynamic_library(NULL, JL_RTLD_DEFAULT);
+    jl_dl_handle = (uv_lib_t *) jl_load_dynamic_library(NULL, JL_RTLD_DEFAULT);
 #ifdef RTLD_DEFAULT
     jl_RTLD_DEFAULT_handle->handle = RTLD_DEFAULT;
 #else
@@ -741,7 +741,11 @@ void julia_init(char *imageFile)
 #ifdef _OS_WINDOWS_
     uv_dlopen("ntdll.dll", jl_ntdll_handle); // bypass julia's pathchecking for system dlls
     uv_dlopen("kernel32.dll", jl_kernel32_handle);
+#if _MSC_VER == 1800
+    uv_dlopen("msvcr120.dll", jl_crtdll_handle);
+#else
     uv_dlopen("msvcrt.dll", jl_crtdll_handle);
+#endif
     uv_dlopen("ws2_32.dll", jl_winsock_handle);
     _jl_exe_handle.handle = GetModuleHandleA(NULL);
     if (!DuplicateHandle(GetCurrentProcess(), GetCurrentThread(),
