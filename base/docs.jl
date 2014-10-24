@@ -89,7 +89,7 @@ function doc(f::Function, m::Method, data, source)
 end
 
 function doc(f::Function)
-  docs = {}
+  docs = []
   for mod in modules
     if haskey(mod.META, f)
       fd = mod.META[f]
