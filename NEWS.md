@@ -38,10 +38,10 @@ Language changes
 
   * `Char` is no longer a subtype of `Integer`. ([#8816])
     Char now supports a more limited set of operations with `Integer` types:
-       
+
       * comparison / equality
       * `Char` + `Int` = `Char`
-      * `Char` - `Char` = `Int` 
+      * `Char` - `Char` = `Int`
 
 Compiler improvements
 ---------------------

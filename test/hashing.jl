@@ -1,5 +1,5 @@
 types = Any[
-    Bool, 
+    Bool,
     Int8, Uint8, Int16, Uint16, Int32, Uint32, Int64, Uint64, Float32, Float64,
     Rational{Int8}, Rational{Uint8}, Rational{Int16}, Rational{Uint16},
     Rational{Int32}, Rational{Uint32}, Rational{Int64}, Rational{Uint64}

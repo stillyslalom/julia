@@ -609,7 +609,7 @@ function cat(catdims, X...)
     for k = 1:length(catdims)
         dims2cat[catdims[k]]=k
     end
-    
+
     typeC = isa(X[1],AbstractArray) ? eltype(X[1]) : typeof(X[1])
     dimsC = Int[d <= ndimsX[1] ? size(X[1],d) : 1 for d=1:ndimsC]
     for k = 1:length(catdims)
@@ -627,12 +627,12 @@ function cat(catdims, X...)
             end
         end
     end
-    
+
     C = similar(isa(X[1],AbstractArray) ? full(X[1]) : [X[1]], typeC, tuple(dimsC...))
     if length(catdims)>1
         fill!(C,0)
     end
-    
+
     offsets = zeros(Int,length(catdims))
     for i=1:nargs
         cat_one = [ dims2cat[d]==0 ? (1:dimsC[d]) : (offsets[dims2cat[d]]+(1:catsizes[i,dims2cat[d]])) for d=1:ndimsC]

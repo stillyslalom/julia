@@ -125,7 +125,7 @@ are::
 .. note::
    Updating operators may change the type of the variable, since any assignment
    statement to a plain variable may change its type.
-   
+
    .. doctest::
 
       julia> x = 0x01; typeof(x)
@@ -133,7 +133,7 @@ are::
 
       julia> x *= 2 #Same as x = x * 2
       2
-      
+
       julia> isa(x, Int)
       true
 
