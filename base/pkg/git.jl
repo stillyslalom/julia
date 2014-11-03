@@ -30,6 +30,8 @@ function success(args::Cmd; dir="")
     Base.success(`$g $args`)
 end
 
+version() = VersionNumber(split(Git.readchomp(`version`), ' ')[3])
+
 modules(args::Cmd; dir="") = readchomp(`config -f .gitmodules $args`, dir=dir)
 different(verA::String, verB::String, path::String; dir="") =
     !success(`diff-tree --quiet $verA $verB -- $path`, dir=dir)

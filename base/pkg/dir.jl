@@ -30,6 +30,9 @@ end
 
 function init(meta::String=DEFAULT_META, branch::String=META_BRANCH)
     dir = path()
+    if Git.version() < v"1.7.3"
+        warn("Pkg only works with git versions greater than v1.7.3")
+    end
     info("Initializing package repository $dir")
     if isdir(joinpath(dir,"METADATA"))
         info("Package directory $dir is already initialized.")
