@@ -32,7 +32,7 @@ function doc(obj)
   end
 end
 
-function doc(obj::Union(Symbol, String))
+function doc(obj::Union(Symbol, AbstractString))
   doc(current_module().(symbol(obj)))
 end
 
@@ -124,7 +124,7 @@ namify(ex::Expr) = namify(ex.args[1])
 namify(sy::Symbol) = sy
 
 function mdify(ex)
-  if isa(ex, String)
+  if isa(ex, AbstractString)
     :(@doc_str $(esc(ex)))
   elseif isexpr(ex, :macrocall) && namify(ex) == symbol("@mstr")
     :(@doc_mstr $(esc(ex.args[2])))
@@ -192,7 +192,7 @@ end
 
       @doc \"""
         # The Foo Function
-        `foo(x)`: Foo the hell out of `x`.
+        `foo(x)`: Foo the living hell out of `x`.
       \""" ->
       function foo() ...
 
