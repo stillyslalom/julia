@@ -200,9 +200,13 @@ macro help_(ex)
 end
 
 macro help (ex)
-  quote
-    let doc = @doc $(esc(ex))
-      doc ≠ nothing ? doc : @help_ $(esc(ex))
+  if ex === :? || ex === :help
+    return :(@help_ $(esc(ex)))
+  else
+    quote
+      let doc = @doc $(esc(ex))
+        doc ≠ nothing ? doc : @help_ $(esc(ex))
+      end
     end
   end
 end
