@@ -27,3 +27,5 @@
 /librandom.*
 /virtualenv-*
 /julia-env
+/objconv*
+/libgit*

@@ -45,7 +45,7 @@ DLLEXPORT void jl_error(const char *str)
     jl_throw(jl_new_struct(jl_errorexception_type, msg));
 }
 
-void jl_errorf(const char *fmt, ...)
+DLLEXPORT void jl_errorf(const char *fmt, ...)
 {
     va_list args;
     ios_t buf;
@@ -604,13 +604,9 @@ JL_CALLABLE(jl_f_set_field)
 JL_CALLABLE(jl_f_field_type)
 {
     JL_NARGS(fieldtype, 2, 2);
-    jl_value_t *v = args[0];
-    jl_value_t *vt = (jl_value_t*)jl_typeof(v);
-    if (vt == (jl_value_t*)jl_module_type)
-        jl_error("cannot assign variables in other modules");
-    if (!jl_is_datatype(vt))
-        jl_type_error("fieldtype", (jl_value_t*)jl_datatype_type, v);
-    jl_datatype_t *st = (jl_datatype_t*)vt;
+    jl_datatype_t *st = (jl_datatype_t*)args[0];
+    if (!jl_is_datatype(st))
+        jl_type_error("fieldtype", (jl_value_t*)jl_datatype_type, (jl_value_t*)st);
     int field_index;
     if (jl_is_long(args[1])) {
         field_index = jl_unbox_long(args[1]) - 1;
@@ -780,7 +776,7 @@ void jl_show(jl_value_t *stream, jl_value_t *v)
         }
         if (jl_show_gf==NULL || stream==NULL) {
             JL_PRINTF(JL_STDERR, " could not show value of type %s",
-                      jl_is_tuple(v) ? "Tuple" : 
+                      jl_is_tuple(v) ? "Tuple" :
                       ((jl_datatype_t*)jl_typeof(v))->name->name->name);
             return;
         }
@@ -1015,7 +1011,7 @@ void jl_init_primitives(void)
     add_builtin_func("eval", jl_f_top_eval);
     add_builtin_func("isdefined", jl_f_isdefined);
     add_builtin_func("yieldto", jl_f_yieldto);
-    
+
     // functions for internal use
     add_builtin_func("tupleref",  jl_f_tupleref);
     add_builtin_func("tuplelen",  jl_f_tuplelen);
@@ -1166,32 +1162,32 @@ DLLEXPORT size_t jl_static_show(JL_STREAM *out, jl_value_t *v)
         n += JL_PRINTF(out, "#<intrinsic function %d>", *(uint32_t*)jl_data_ptr(v));
     }
     else if (jl_is_int64(v)) {
-        n += JL_PRINTF(out, "%d", jl_unbox_int64(v));
+        n += JL_PRINTF(out, "%lld", jl_unbox_int64(v));
     }
     else if (jl_is_int32(v)) {
         n += JL_PRINTF(out, "%d", jl_unbox_int32(v));
     }
     else if (jl_typeis(v,jl_int16_type)) {
-        n += JL_PRINTF(out, "%d", jl_unbox_int16(v));
+        n += JL_PRINTF(out, "%hd", jl_unbox_int16(v));
     }
     else if (jl_typeis(v,jl_int8_type)) {
-        n += JL_PRINTF(out, "%d", jl_unbox_int8(v));
+        n += JL_PRINTF(out, "%hhd", jl_unbox_int8(v));
     }
     else if (jl_is_uint64(v)) {
-        n += JL_PRINTF(out, "0x%016x", jl_unbox_uint64(v));
+        n += JL_PRINTF(out, "0x%016llx", jl_unbox_uint64(v));
     }
     else if (jl_is_uint32(v)) {
         n += JL_PRINTF(out, "0x%08x", jl_unbox_uint32(v));
     }
     else if (jl_typeis(v,jl_uint16_type)) {
-        n += JL_PRINTF(out, "0x%04x", jl_unbox_uint16(v));
+        n += JL_PRINTF(out, "0x%04hx", jl_unbox_uint16(v));
     }
     else if (jl_typeis(v,jl_uint8_type)) {
-        n += JL_PRINTF(out, "0x%02x", jl_unbox_uint8(v));
+        n += JL_PRINTF(out, "0x%02hhx", jl_unbox_uint8(v));
     }
     else if (jl_is_cpointer(v)) {
 #ifdef _P64
-        n += JL_PRINTF(out, "0x%016x", jl_unbox_voidpointer(v));
+        n += JL_PRINTF(out, "0x%016llx", jl_unbox_voidpointer(v));
 #else
         n += JL_PRINTF(out, "0x%08x", jl_unbox_voidpointer(v));
 #endif

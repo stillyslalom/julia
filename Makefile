@@ -195,6 +195,9 @@ endif
 ifeq ($(USE_SYSTEM_MPFR),0)
 JL_PRIVATE_LIBS += mpfr
 endif
+ifeq ($(USE_SYSTEM_LIBGIT2),0)
+JL_PRIVATE_LIBS += git2
+endif
 ifeq ($(USE_SYSTEM_ARPACK),0)
 JL_PRIVATE_LIBS += arpack
 endif
@@ -382,7 +385,7 @@ source-dist: git-submodules
 	# Create file source-dist.tmp to hold all the filenames that go into the tarball
 	echo "base/version_git.jl" > source-dist.tmp
 	git ls-files >> source-dist.tmp
-	ls deps/*.tar.gz deps/*.tar.bz2 deps/*.tgz >> source-dist.tmp
+	ls deps/*.tar.gz deps/*.tar.bz2 deps/*.tar.xz deps/*.tgz deps/*.zip >> source-dist.tmp
 	git submodule --quiet foreach 'git ls-files | sed "s&^&$$path/&"' >> source-dist.tmp
 
 	# Remove unwanted files

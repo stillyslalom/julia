@@ -45,10 +45,10 @@ isconst(m::Module, s::Symbol) =
     ccall(:jl_is_const, Int32, (Any, Any), m, s) != 0
 
 # return an integer such that object_id(x)==object_id(y) if is(x,y)
-object_id(x::ANY) = ccall(:jl_object_id, Uint, (Any,), x)
+object_id(x::ANY) = ccall(:jl_object_id, UInt, (Any,), x)
 
 # type predicates
-const isimmutable = x->(isa(x,Tuple) || !typeof(x).mutable)
+isimmutable(x::ANY) = (isa(x,Tuple) || !typeof(x).mutable)
 isstructtype(t::DataType) = t.names!=() || (t.size==0 && !t.abstract)
 isstructtype(x) = false
 isbits(t::DataType) = !t.mutable & t.pointerfree & isleaftype(t)

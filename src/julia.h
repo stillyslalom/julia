@@ -16,7 +16,11 @@ extern "C" {
 #include <setjmp.h>
 #ifndef _OS_WINDOWS_
 #  define jl_jmp_buf sigjmp_buf
-#  define MAX_ALIGN sizeof(void*)
+#  if defined(__arm__)
+#    define MAX_ALIGN 8
+#  else
+#    define MAX_ALIGN sizeof(void*)
+#  endif
 #else
 #  define jl_jmp_buf jmp_buf
 #  include <malloc.h> //for _resetstkoflw
@@ -821,7 +825,7 @@ DLLEXPORT jl_value_t *jl_environ(int i);
 
 // throwing common exceptions
 DLLEXPORT void NORETURN jl_error(const char *str);
-void NORETURN jl_errorf(const char *fmt, ...);
+DLLEXPORT void NORETURN jl_errorf(const char *fmt, ...);
 DLLEXPORT void jl_too_few_args(const char *fname, int min);
 DLLEXPORT void jl_too_many_args(const char *fname, int max);
 DLLEXPORT void jl_type_error(const char *fname, jl_value_t *expected, jl_value_t *got);
@@ -1244,7 +1248,7 @@ DLLEXPORT int jl_spawn(char *name, char **argv, uv_loop_t *loop,
                        uv_process_t *proc, jl_value_t *julia_struct,
                        uv_handle_type stdin_type,uv_pipe_t *stdin_pipe,
                        uv_handle_type stdout_type,uv_pipe_t *stdout_pipe,
-                       uv_handle_type stderr_type,uv_pipe_t *stderr_pipe, 
+                       uv_handle_type stderr_type,uv_pipe_t *stderr_pipe,
                        int detach, char **env, char *cwd);
 DLLEXPORT void jl_run_event_loop(uv_loop_t *loop);
 DLLEXPORT int jl_run_once(uv_loop_t *loop);

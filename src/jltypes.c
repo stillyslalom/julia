@@ -244,7 +244,7 @@ jl_tuple_t *jl_compute_type_union(jl_tuple_t *types)
 {
     size_t n = count_union_components(types);
     jl_value_t **temp;
-    JL_GC_PUSHARGS(temp, n);
+    JL_GC_PUSHARGS(temp, n+1);
     size_t idx=0;
     flatten_type_union(types, temp, &idx);
     assert(idx == n);
@@ -265,7 +265,9 @@ jl_tuple_t *jl_compute_type_union(jl_tuple_t *types)
             }
         }
     }
+    temp[n] = NULL;
     jl_tuple_t *result = jl_alloc_tuple_uninit(n - ndel);
+    temp[n] = (jl_value_t*)result; // root result tuple while sorting
     j=0;
     for(i=0; i < n; i++) {
         if (temp[i] != NULL) {
@@ -1464,12 +1466,9 @@ jl_value_t *jl_type_intersection_matching(jl_value_t *a, jl_value_t *b,
         }
     }
 
-    *penv = jl_alloc_tuple_uninit(eqc.n);
     for(int i=0; i < eqc.n; i+=2) {
-        jl_tupleset(*penv, i, eqc.data[i]);
-        jl_tupleset(*penv, i+1, *tvar_lookup(&eqc, &eqc.data[i+1]));
+        eqc.data[i+1] = *tvar_lookup(&eqc, &eqc.data[i+1]);
     }
-
     if (env0 > 0) {
         /*
           in a situation like this:
@@ -1479,24 +1478,30 @@ jl_value_t *jl_type_intersection_matching(jl_value_t *a, jl_value_t *b,
           N = 1
           So we need to instantiate all the RHS's first.
         */
-        for(int i=1; i < eqc.n; i+=2) {
-            jl_value_t *rhs = jl_tupleref(*penv,i);
-            if (jl_has_typevars_(rhs,1)) {
-                JL_TRY {
-                    jl_tupleset(*penv, i,
-                                jl_instantiate_type_with(rhs,
-                                                         &jl_t0(*penv), eqc.n/2));
-                }
-                JL_CATCH {
-                }
+        for(int i=0; i < eqc.n; i+=2) {
+            JL_TRY {
+                eqc.data[i+1] = jl_instantiate_type_with(eqc.data[i+1], eqc.data, eqc.n/2);
+            }
+            JL_CATCH {
             }
         }
         JL_TRY {
-            *pti = (jl_value_t*)jl_instantiate_type_with((jl_value_t*)*pti,
-                                                         &jl_t0(*penv), eqc.n/2);
+            *pti = (jl_value_t*)jl_instantiate_type_with(*pti, eqc.data, eqc.n/2);
         }
         JL_CATCH {
             *pti = (jl_value_t*)jl_bottom_type;
+        }
+    }
+
+    // return environment in same order as tvars
+    *penv = jl_alloc_tuple_uninit(tvarslen*2);
+    for(int tk=0; tk < tvarslen; tk++) {
+        jl_tvar_t *tv = (jl_tvar_t*)tvs[tk];
+        for(e=0; e < eqc.n; e+=2) {
+            if (eqc.data[e] == (jl_value_t*)tv) {
+                jl_tupleset(*penv, tk*2, tv);
+                jl_tupleset(*penv, tk*2+1, eqc.data[e+1]);
+            }
         }
     }
 
@@ -2605,6 +2610,11 @@ static jl_value_t *type_match_(jl_value_t *child, jl_value_t *parent,
     if (jl_is_typector(parent))
         parent = (jl_value_t*)((jl_typector_t*)parent)->body;
     size_t i, j;
+    if (match_intersection_mode && jl_is_typevar(child) && !jl_is_typevar(parent)) {
+        tmp = child;
+        child = parent;
+        parent = tmp;
+    }
     if (jl_is_typevar(parent)) {
         // make sure type is within this typevar's bounds
         if (morespecific) {
@@ -3054,7 +3064,7 @@ void jl_init_types(void)
                             tv);
 
     tv = jl_tuple2(tvar("T"), tvar("N"));
-    jl_array_type = 
+    jl_array_type =
         jl_new_datatype(jl_symbol("Array"),
                         (jl_datatype_t*)
                         jl_apply_type((jl_value_t*)jl_densearray_type, tv),
@@ -3067,12 +3077,12 @@ void jl_init_types(void)
         (jl_value_t*)jl_apply_type((jl_value_t*)jl_array_type,
                                    jl_tuple(2, jl_any_type,
                                             jl_box_long(1)));
-    
+
     jl_array_symbol_type =
         (jl_value_t*)jl_apply_type((jl_value_t*)jl_array_type,
                                    jl_tuple(2, jl_symbol_type,
                                             jl_box_long(1)));
-    
+
     jl_expr_type =
         jl_new_datatype(jl_symbol("Expr"),
                         jl_any_type, jl_null,

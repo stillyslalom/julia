@@ -602,6 +602,7 @@ export
     sort,
     sortcols,
     sortperm,
+    sortperm!,
     sortrows,
     squeeze,
     step,
@@ -714,6 +715,8 @@ export
     sprandn,
     spzeros,
     symperm,
+    rowvals,
+    nzrange,
 
 # bitarrays
     bitpack,
@@ -1089,7 +1092,6 @@ export
     gc_disable,
     gc_enable,
     precompile,
-    clear_malloc_data,
 
 # misc
     atexit,
