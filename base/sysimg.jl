@@ -224,6 +224,7 @@ include("client.jl")
 include("markdown/Markdown.jl")
 include("docs.jl")
 using .Docs
+using .Markdown
 
 # (s)printf macros
 include("printf.jl")

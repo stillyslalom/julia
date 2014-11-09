@@ -1401,4 +1401,6 @@ export
     @label,
     @goto,
     @inline,
-    @doc
+    @doc,
+    @doc_str,
+    @doc_mstr
