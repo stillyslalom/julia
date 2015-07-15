@@ -6,7 +6,7 @@ convert(::Type{Bool}, x::Real) = (x!=0)
 # promote Bool to any other numeric type
 promote_rule{T<:Number}(::Type{Bool}, ::Type{T}) = T
 
-bool(x::Bool) = x
+bool(x::Bool) = x # "test comment"
 bool(x::Number) = convert(Bool, x)
 
 typemin(::Type{Bool}) = false
